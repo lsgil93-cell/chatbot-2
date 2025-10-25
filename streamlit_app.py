@@ -51,11 +51,29 @@ if "messages" not in st.session_state:
 
 # ✅ 대화 초기화 버튼
 if st.button("🧹 대화 초기화"):
-    # 전체 세션을 지우지 말고 messages만 초기화
     st.session_state.messages = [
         {"role": "assistant", "content": "대화를 새로 시작합니다. 무엇을 도와드릴까요?"}
     ]
-    st.rerun()  # ✅ 최신 rerun 사용
+    st.rerun()
+
+# -------------------------------
+# ☕ 커피쏘기 버튼
+# -------------------------------
+# 커피 이미지 표시 여부 상태값
+if "show_coffee" not in st.session_state:
+    st.session_state.show_coffee = False
+
+# 버튼 클릭 시 토글
+if st.button("☕ 커피 쏘기"):
+    st.session_state.show_coffee = not st.session_state.show_coffee
+
+# 커피 이미지 표시
+if st.session_state.show_coffee:
+    st.image(
+        "https://cdn-icons-png.flaticon.com/512/924/924514.png",  # 커피잔 이미지 URL
+        width=120,
+        caption="커피 한잔 하세요 ☕"
+    )
 
 # -------------------------------
 # 🧠 OpenAI 클라이언트 생성
@@ -63,38 +81,4 @@ if st.button("🧹 대화 초기화"):
 client = OpenAI(api_key=st.session_state.api_key)
 
 # -------------------------------
-# 💬 기존 대화 표시
-# -------------------------------
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# -------------------------------
-# ✍️ 사용자 입력 및 응답 처리
-# -------------------------------
-if prompt := st.chat_input("메시지를 입력하세요..."):
-    # 사용자 메시지 추가 및 표시
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    # OpenAI 응답 생성
-    try:
-        stream = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
-
-        # 실시간 스트리밍 출력
-        with st.chat_message("assistant"):
-            response = st.write_stream(stream)
-
-        # 응답 저장
-        st.session_state.messages.append({"role": "assistant", "content": response})
-
-    except Exception as e:
-        st.error(f"❌ 오류 발생: {str(e)}")
+# 💬
